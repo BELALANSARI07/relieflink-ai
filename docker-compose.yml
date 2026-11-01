@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  relieflink-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: relieflink-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://relieflink:relieflink_secret@relieflink-db:5432/relieflink_db?schema=public
+      - NEXTAUTH_SECRET=relieflink-super-secret-key-production-32chars
+      - NEXTAUTH_URL=http://localhost:3000
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - NODE_ENV=production
+    depends_on:
+      relieflink-db:
+        condition: service_healthy
+
+  relieflink-db:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: relieflink-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: relieflink
+      POSTGRES_PASSWORD: relieflink_secret
+      POSTGRES_DB: relieflink_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./prisma/schema_design.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relieflink -d relieflink_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local

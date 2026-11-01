@@ -1,0 +1,931 @@
+// ReliefLink AI — Complete Prisma Database Schema
+// AI-Powered Disaster Response & Relief Coordination Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  CITIZEN
+  VOLUNTEER
+  NGO_ADMIN
+  RESCUE_TEAM
+  HOSPITAL_ADMIN
+  SHELTER_ADMIN
+  GOVERNMENT_AUTHORITY
+  SUPER_ADMIN
+}
+
+enum DisasterType {
+  EARTHQUAKE
+  FLOOD
+  HURRICANE
+  WILDFIRE
+  TSUNAMI
+  LANDSLIDE
+  DROUGHT
+  PANDEMIC
+  INDUSTRIAL_ACCIDENT
+  OTHER
+}
+
+enum DisasterSeverity {
+  LOW
+  MODERATE
+  HIGH
+  CRITICAL
+  CATASTROPHIC
+}
+
+enum DisasterStatus {
+  REPORTED
+  VERIFIED
+  ACTIVE
+  CONTAINED
+  RESOLVED
+  CLOSED
+}
+
+enum SosType {
+  MEDICAL
+  RESCUE
+  EVACUATION
+  FOOD_WATER
+  SHELTER
+  MISSING_PERSON
+  OTHER
+}
+
+enum SosStatus {
+  PENDING
+  ACKNOWLEDGED
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+  EXPIRED
+}
+
+enum RescueTeamStatus {
+  AVAILABLE
+  DEPLOYED
+  EN_ROUTE
+  ON_SCENE
+  RETURNING
+  OFF_DUTY
+  STANDBY
+}
+
+enum RescueAssignmentStatus {
+  ASSIGNED
+  ACCEPTED
+  EN_ROUTE
+  ON_SCENE
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum RescueTeamSpecialization {
+  URBAN_SEARCH_RESCUE
+  WATER_RESCUE
+  MOUNTAIN_RESCUE
+  MEDICAL
+  HAZMAT
+  K9_UNIT
+  AERIAL
+  GENERAL
+}
+
+enum NgoOperationalStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum ReliefTaskType {
+  FOOD_DISTRIBUTION
+  MEDICAL_AID
+  SHELTER_SETUP
+  EVACUATION
+  SEARCH_RESCUE
+  DEBRIS_CLEARING
+  WATER_SANITATION
+  PSYCHOSOCIAL_SUPPORT
+  LOGISTICS
+  OTHER
+}
+
+enum TaskStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}
+
+enum PriorityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ResourceStatus {
+  AVAILABLE
+  RESERVED
+  IN_TRANSIT
+  DEPLOYED
+  DEPLETED
+  EXPIRED
+  DAMAGED
+}
+
+enum ResourceRequestStatus {
+  PENDING
+  APPROVED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  DENIED
+  CANCELLED
+}
+
+enum AllocationStatus {
+  ALLOCATED
+  DISPATCHED
+  IN_TRANSIT
+  DELIVERED
+  RETURNED
+  CANCELLED
+}
+
+enum ResourceOwnerType {
+  GOVERNMENT
+  NGO
+  HOSPITAL
+  SHELTER
+  PRIVATE
+  DONATED
+}
+
+enum ShelterStatus {
+  PREPARING
+  OPEN
+  FULL
+  CLOSED
+  EVACUATING
+}
+
+enum VolunteerAvailability {
+  AVAILABLE
+  BUSY
+  UNAVAILABLE
+  ON_ASSIGNMENT
+}
+
+enum VolunteerAssignmentStatus {
+  ASSIGNED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum NotificationType {
+  DISASTER_ALERT
+  SOS_UPDATE
+  ASSIGNMENT
+  RESOURCE_UPDATE
+  SHELTER_UPDATE
+  HOSPITAL_UPDATE
+  SYSTEM
+  AI_RECOMMENDATION
+  VOLUNTEER_REQUEST
+  RELIEF_UPDATE
+}
+
+enum AiRecommendationType {
+  RESOURCE_ALLOCATION
+  EVACUATION_ROUTE
+  RESCUE_PRIORITY
+  SHELTER_ASSIGNMENT
+  VOLUNTEER_MATCHING
+  SUPPLY_FORECAST
+  DAMAGE_ASSESSMENT
+  RISK_PREDICTION
+  NGO_ASSIGNMENT
+}
+
+enum AiRecommendationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  IMPLEMENTED
+  EXPIRED
+}
+
+enum AiClassificationType {
+  DISASTER_SEVERITY
+  DAMAGE_LEVEL
+  SOS_PRIORITY
+  IMAGE_CLASSIFICATION
+  TEXT_SENTIMENT
+  RESOURCE_NEED
+  DUPLICATE_DETECTION
+}
+
+enum NgoAreaStatus {
+  ACTIVE
+  INACTIVE
+  PLANNED
+}
+
+// ============================================================================
+// 1. USERS & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String     @map("password_hash")
+  fullName      String     @map("full_name")
+  phone         String?    @unique
+  avatarUrl     String?    @map("avatar_url")
+  isVerified    Boolean    @default(false) @map("is_verified")
+  isActive      Boolean    @default(true) @map("is_active")
+  lastLoginAt   DateTime?  @map("last_login_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  // Relationships
+  roles               UserRoleAssignment[]
+  refreshTokens       RefreshToken[]
+  reportedDisasters   Disaster[]           @relation("DisasterReporter")
+  verifiedDisasters   Disaster[]           @relation("DisasterVerifier")
+  disasterUpdates     DisasterUpdate[]
+  sosRequests         SosRequest[]
+  ledRescueTeams      RescueTeam[]         @relation("RescueTeamLeader")
+  rescueTeamMembers   RescueTeamMember[]
+  rescueAssignments   RescueAssignment[]   @relation("AssignmentCreator")
+  adminNgos           Ngo[]                @relation("NgoAdmin")
+  ngoMembers          NgoMember[]
+  assignedReliefTasks ReliefTask[]         @relation("ReliefTaskAssigner")
+  resourceRequests    ResourceRequest[]
+  resourceAllocations ResourceAllocation[] @relation("ResourceAllocator")
+  adminShelters       Shelter[]            @relation("ShelterAdmin")
+  shelterUpdates      ShelterUpdate[]
+  adminHospitals      Hospital[]           @relation("HospitalAdmin")
+  hospitalUpdates     HospitalUpdate[]
+  volunteerProfile    VolunteerProfile?
+  volunteerAssignmentsAssigned VolunteerAssignment[] @relation("VolunteerTaskAssigner")
+  notifications       Notification[]
+  alertSubscriptions  AlertSubscription[]
+  aiRecommendations   AiRecommendation[]   @relation("AiRecommendationCreator")
+  auditLogs           AuditLog[]
+
+  @@index([email])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model UserRoleAssignment {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  role      UserRole
+  grantedAt DateTime @default(now()) @map("granted_at")
+  grantedBy String?  @map("granted_by")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+  @@map("user_roles")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  family    String   @default(uuid())
+  isRevoked Boolean  @default(false) @map("is_revoked")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ============================================================================
+// 2. DISASTER MANAGEMENT
+// ============================================================================
+
+model Disaster {
+  id               String           @id @default(uuid())
+  title            String
+  description      String
+  type             DisasterType
+  severity         DisasterSeverity
+  status           DisasterStatus   @default(REPORTED)
+  latitude         Float
+  longitude        Float
+  address          String?
+  affectedRadiusKm Float            @default(10.0) @map("affected_radius_km")
+  reportedById     String?          @map("reported_by_id")
+  verifiedById     String?          @map("verified_by_id")
+  startedAt        DateTime         @default(now()) @map("started_at")
+  endedAt          DateTime?        @map("ended_at")
+  metadata         Json?            @default("{}")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  reportedBy User? @relation("DisasterReporter", fields: [reportedById], references: [id], onDelete: SetNull)
+  verifiedBy User? @relation("DisasterVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  updates          DisasterUpdate[]
+  sosRequests      SosRequest[]
+  reliefTasks      ReliefTask[]
+  resourceRequests ResourceRequest[]
+  volunteerAssignments VolunteerAssignment[]
+
+  @@index([type])
+  @@index([severity])
+  @@index([status])
+  @@index([latitude, longitude])
+  @@index([startedAt])
+  @@map("disasters")
+}
+
+model DisasterUpdate {
+  id             String            @id @default(uuid())
+  disasterId     String            @map("disaster_id")
+  updateText     String            @map("update_text")
+  severityChange DisasterSeverity? @map("severity_change")
+  postedById     String?           @map("posted_by_id")
+  metadata       Json?             @default("{}")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  disaster Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  postedBy User?    @relation(fields: [postedById], references: [id], onDelete: SetNull)
+
+  @@index([disasterId])
+  @@index([createdAt])
+  @@map("disaster_updates")
+}
+
+// ============================================================================
+// 3. SOS & RESCUE MANAGEMENT
+// ============================================================================
+
+model SosRequest {
+  id             String        @id @default(uuid())
+  citizenId      String?       @map("citizen_id")
+  disasterId     String?       @map("disaster_id")
+  type           SosType
+  description    String
+  severity       PriorityLevel @default(HIGH)
+  latitude       Float
+  longitude      Float
+  address        String?
+  status         SosStatus     @default(PENDING)
+  assignedTeamId String?       @map("assigned_team_id")
+  isDuplicate    Boolean       @default(false) @map("is_duplicate")
+  duplicateOfId  String?       @map("duplicate_of_id")
+  contactPhone   String?       @map("contact_phone")
+  peopleCount    Int           @default(1) @map("people_count")
+  medicalNeeds   String?       @map("medical_needs")
+  metadata       Json?         @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  citizen      User?              @relation(fields: [citizenId], references: [id], onDelete: SetNull)
+  disaster     Disaster?          @relation(fields: [disasterId], references: [id], onDelete: SetNull)
+  assignedTeam RescueTeam?        @relation("AssignedTeam", fields: [assignedTeamId], references: [id], onDelete: SetNull)
+  duplicateOf  SosRequest?        @relation("SosDuplicates", fields: [duplicateOfId], references: [id], onDelete: SetNull)
+  duplicates   SosRequest[]       @relation("SosDuplicates")
+  assignments  RescueAssignment[]
+
+  @@index([status])
+  @@index([severity])
+  @@index([latitude, longitude])
+  @@index([createdAt])
+  @@map("sos_requests")
+}
+
+model RescueTeam {
+  id             String                   @id @default(uuid())
+  name           String
+  leaderId       String?                  @map("leader_id")
+  status         RescueTeamStatus         @default(AVAILABLE)
+  latitude       Float?
+  longitude      Float?
+  capacity       Int                      @default(5)
+  specialization RescueTeamSpecialization @default(GENERAL)
+  contactNumber  String?                  @map("contact_number")
+  equipment      Json?                    @default("[]")
+  createdAt      DateTime                 @default(now()) @map("created_at")
+  updatedAt      DateTime                 @updatedAt @map("updated_at")
+
+  leader      User?              @relation("RescueTeamLeader", fields: [leaderId], references: [id], onDelete: SetNull)
+  members     RescueTeamMember[]
+  sosRequests SosRequest[]       @relation("AssignedTeam")
+  assignments RescueAssignment[]
+
+  @@index([status])
+  @@index([specialization])
+  @@map("rescue_teams")
+}
+
+model RescueTeamMember {
+  id         String   @id @default(uuid())
+  teamId     String   @map("team_id")
+  userId     String   @map("user_id")
+  roleInTeam String   @default("Member") @map("role_in_team")
+  joinedAt   DateTime @default(now()) @map("joined_at")
+
+  team RescueTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("rescue_team_members")
+}
+
+model RescueAssignment {
+  id           String                 @id @default(uuid())
+  sosId        String                 @map("sos_id")
+  teamId       String                 @map("team_id")
+  assignedById String?                @map("assigned_by_id")
+  status       RescueAssignmentStatus @default(ASSIGNED)
+  priority     PriorityLevel          @default(HIGH)
+  notes        String?
+  startedAt    DateTime?              @map("started_at")
+  completedAt  DateTime?              @map("completed_at")
+  createdAt    DateTime               @default(now()) @map("created_at")
+  updatedAt    DateTime               @updatedAt @map("updated_at")
+
+  sos        SosRequest @relation(fields: [sosId], references: [id], onDelete: Cascade)
+  team       RescueTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignedBy User?      @relation("AssignmentCreator", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@index([sosId])
+  @@index([teamId])
+  @@index([status])
+  @@map("rescue_assignments")
+}
+
+// ============================================================================
+// 4. NGO & RELIEF COORDINATION
+// ============================================================================
+
+model Ngo {
+  id                 String               @id @default(uuid())
+  name               String
+  registrationNumber String               @unique @map("registration_number")
+  description        String?
+  adminId            String?              @map("admin_id")
+  verified           Boolean              @default(false)
+  verificationDocUrl String?              @map("verification_doc_url")
+  operationalStatus  NgoOperationalStatus @default(PENDING_VERIFICATION) @map("operational_status")
+  capabilities       Json                 @default("[]")
+  contactEmail       String?              @map("contact_email")
+  contactPhone       String?              @map("contact_phone")
+  address            String?
+  website            String?
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+
+  admin            User?                @relation("NgoAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+  operationalAreas NgoOperationalArea[]
+  members          NgoMember[]
+  reliefTasks      ReliefTask[]
+  activities       ReliefActivity[]
+
+  @@index([verified])
+  @@index([operationalStatus])
+  @@map("ngos")
+}
+
+model NgoOperationalArea {
+  id          String         @id @default(uuid())
+  ngoId       String         @map("ngo_id")
+  areaName    String         @map("area_name")
+  coordinates Json           @default("[]") // GeoJSON Polygon or bounds
+  latitude    Float?
+  longitude   Float?
+  radiusKm    Float?         @map("radius_km")
+  status      NgoAreaStatus  @default(ACTIVE)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  ngo Ngo @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+
+  @@index([ngoId])
+  @@map("ngo_operational_areas")
+}
+
+model NgoMember {
+  id        String   @id @default(uuid())
+  ngoId     String   @map("ngo_id")
+  userId    String   @map("user_id")
+  roleInNgo String   @default("Volunteer") @map("role_in_ngo")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  ngo  Ngo  @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([ngoId, userId])
+  @@map("ngo_members")
+}
+
+model ReliefTask {
+  id           String         @id @default(uuid())
+  disasterId   String         @map("disaster_id")
+  ngoId        String?        @map("ngo_id")
+  title        String
+  description  String
+  type         ReliefTaskType
+  status       TaskStatus     @default(PENDING)
+  latitude     Float?
+  longitude    Float?
+  areaName     String?        @map("area_name")
+  priority     PriorityLevel  @default(MEDIUM)
+  assignedById String?        @map("assigned_by_id")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  completedAt  DateTime?      @map("completed_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  disaster             Disaster              @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  ngo                  Ngo?                  @relation(fields: [ngoId], references: [id], onDelete: SetNull)
+  assignedBy           User?                 @relation("ReliefTaskAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+  activities           ReliefActivity[]
+  volunteerAssignments VolunteerAssignment[]
+
+  @@index([disasterId])
+  @@index([ngoId])
+  @@index([status])
+  @@index([priority])
+  @@map("relief_tasks")
+}
+
+model ReliefActivity {
+  id                 String   @id @default(uuid())
+  taskId             String   @map("task_id")
+  ngoId              String   @map("ngo_id")
+  description        String
+  resourcesUsed      Json     @default("[]") @map("resources_used")
+  beneficiariesCount Int      @default(0) @map("beneficiaries_count")
+  latitude           Float?
+  longitude          Float?
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  task ReliefTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  ngo  Ngo        @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([ngoId])
+  @@map("relief_activities")
+}
+
+// ============================================================================
+// 5. RESOURCE MANAGEMENT
+// ============================================================================
+
+model ResourceCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  unit        String   @default("units")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  resources        Resource[]
+  resourceRequests ResourceRequest[]
+
+  @@map("resource_categories")
+}
+
+model Resource {
+  id          String            @id @default(uuid())
+  categoryId  String            @map("category_id")
+  name        String
+  description String?
+  quantity    Float             @default(0)
+  unit        String
+  latitude    Float?
+  longitude   Float?
+  address     String?
+  ownerType   ResourceOwnerType @default(GOVERNMENT) @map("owner_type")
+  ownerId     String?           @map("owner_id")
+  status      ResourceStatus    @default(AVAILABLE)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  category    ResourceCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  allocations ResourceAllocation[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([ownerType])
+  @@map("resources")
+}
+
+model ResourceRequest {
+  id                String                @id @default(uuid())
+  disasterId        String                @map("disaster_id")
+  requestedById     String?               @map("requested_by_id")
+  categoryId        String                @map("category_id")
+  quantityNeeded    Float                 @map("quantity_needed")
+  priority          PriorityLevel         @default(MEDIUM)
+  status            ResourceRequestStatus @default(PENDING)
+  fulfilledQuantity Float                 @default(0) @map("fulfilled_quantity")
+  notes             String?
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
+
+  disaster    Disaster             @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  requestedBy User?                @relation(fields: [requestedById], references: [id], onDelete: SetNull)
+  category    ResourceCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  allocations ResourceAllocation[]
+
+  @@index([disasterId])
+  @@index([status])
+  @@map("resource_requests")
+}
+
+model ResourceAllocation {
+  id            String           @id @default(uuid())
+  requestId     String           @map("request_id")
+  resourceId    String           @map("resource_id")
+  quantity      Float
+  allocatedById String?          @map("allocated_by_id")
+  status        AllocationStatus @default(ALLOCATED)
+  dispatchedAt  DateTime?        @map("dispatched_at")
+  deliveredAt   DateTime?        @map("delivered_at")
+  notes         String?
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  request     ResourceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  resource    Resource        @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  allocatedBy User?           @relation("ResourceAllocator", fields: [allocatedById], references: [id], onDelete: SetNull)
+
+  @@index([requestId])
+  @@index([resourceId])
+  @@index([status])
+  @@map("resource_allocations")
+}
+
+// ============================================================================
+// 6. SHELTERS & HOSPITALS
+// ============================================================================
+
+model Shelter {
+  id               String        @id @default(uuid())
+  name             String
+  adminId          String?       @map("admin_id")
+  latitude         Float
+  longitude        Float
+  address          String
+  totalCapacity    Int           @map("total_capacity")
+  currentOccupancy Int           @default(0) @map("current_occupancy")
+  status           ShelterStatus @default(OPEN)
+  facilities       Json          @default("[]")
+  contactPhone     String?       @map("contact_phone")
+  contactEmail     String?       @map("contact_email")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  admin   User?           @relation("ShelterAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+  updates ShelterUpdate[]
+
+  @@index([status])
+  @@index([latitude, longitude])
+  @@map("shelters")
+}
+
+model ShelterUpdate {
+  id               String   @id @default(uuid())
+  shelterId        String   @map("shelter_id")
+  occupancyChange  Int      @map("occupancy_change")
+  currentOccupancy Int      @map("current_occupancy")
+  notes            String?
+  updatedById      String?  @map("updated_by_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  shelter   Shelter @relation(fields: [shelterId], references: [id], onDelete: Cascade)
+  updatedBy User?   @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([shelterId])
+  @@index([createdAt])
+  @@map("shelter_updates")
+}
+
+model Hospital {
+  id               String   @id @default(uuid())
+  name             String
+  adminId          String?  @map("admin_id")
+  latitude         Float
+  longitude        Float
+  address          String
+  totalBeds        Int      @map("total_beds")
+  availableBeds    Int      @map("available_beds")
+  icuBeds          Int      @default(0) @map("icu_beds")
+  availableIcu     Int      @default(0) @map("available_icu")
+  specializations  Json     @default("[]")
+  emergencyCapable Boolean  @default(true) @map("emergency_capable")
+  contactPhone     String?  @map("contact_phone")
+  contactEmail     String?  @map("contact_email")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  admin   User?            @relation("HospitalAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+  updates HospitalUpdate[]
+
+  @@index([emergencyCapable])
+  @@index([latitude, longitude])
+  @@map("hospitals")
+}
+
+model HospitalUpdate {
+  id            String   @id @default(uuid())
+  hospitalId    String   @map("hospital_id")
+  bedsChange    Int      @map("beds_change")
+  availableBeds Int      @map("available_beds")
+  icuChange     Int      @default(0) @map("icu_change")
+  availableIcu  Int      @default(0) @map("available_icu")
+  notes         String?
+  updatedById   String?  @map("updated_by_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  hospital  Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  updatedBy User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([hospitalId])
+  @@index([createdAt])
+  @@map("hospital_updates")
+}
+
+// ============================================================================
+// 7. VOLUNTEER MANAGEMENT
+// ============================================================================
+
+model VolunteerProfile {
+  id                 String                @id @default(uuid())
+  userId             String                @unique @map("user_id")
+  skills             Json                  @default("[]")
+  availabilityStatus VolunteerAvailability @default(AVAILABLE) @map("availability_status")
+  latitude           Float?
+  longitude          Float?
+  address            String?
+  verified           Boolean               @default(false)
+  verificationDocUrl String?               @map("verification_doc_url")
+  hoursContributed   Float                 @default(0) @map("hours_contributed")
+  createdAt          DateTime              @default(now()) @map("created_at")
+  updatedAt          DateTime              @updatedAt @map("updated_at")
+
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments VolunteerAssignment[]
+
+  @@index([availabilityStatus])
+  @@index([verified])
+  @@map("volunteer_profiles")
+}
+
+model VolunteerAssignment {
+  id              String                    @id @default(uuid())
+  volunteerId     String                    @map("volunteer_id")
+  disasterId      String?                   @map("disaster_id")
+  taskId          String?                   @map("task_id")
+  taskDescription String                    @map("task_description")
+  status          VolunteerAssignmentStatus @default(ASSIGNED)
+  assignedById    String?                   @map("assigned_by_id")
+  startedAt       DateTime?                 @map("started_at")
+  completedAt     DateTime?                 @map("completed_at")
+  createdAt       DateTime                  @default(now()) @map("created_at")
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
+
+  volunteer  VolunteerProfile @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  disaster   Disaster?        @relation(fields: [disasterId], references: [id], onDelete: SetNull)
+  reliefTask ReliefTask?      @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  assignedBy User?            @relation("VolunteerTaskAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@index([volunteerId])
+  @@index([disasterId])
+  @@index([status])
+  @@map("volunteer_assignments")
+}
+
+// ============================================================================
+// 8. NOTIFICATIONS & ALERTS
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType @default(SYSTEM)
+  title     String
+  message   String
+  data      Json?            @default("{}")
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model AlertSubscription {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  disasterTypes Json     @default("[]") @map("disaster_types")
+  latitude      Float?
+  longitude     Float?
+  radiusKm      Float    @default(50.0) @map("radius_km")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("alert_subscriptions")
+}
+
+// ============================================================================
+// 9. AI & INTELLIGENCE LAYER
+// ============================================================================
+
+model AiRecommendation {
+  id             String                 @id @default(uuid())
+  type           AiRecommendationType
+  contextId      String?                @map("context_id")
+  contextType    String?                @map("context_type")
+  recommendation Json
+  confidence     Float                  @default(0.8)
+  explanation    String
+  status         AiRecommendationStatus @default(PENDING)
+  modelVersion   String                 @default("gemini-1.5-flash") @map("model_version")
+  createdById    String?                @map("created_by_id")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+
+  createdBy User? @relation("AiRecommendationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([type])
+  @@index([status])
+  @@index([contextId])
+  @@map("ai_recommendations")
+}
+
+model AiClassification {
+  id           String               @id @default(uuid())
+  type         AiClassificationType
+  inputId      String?              @map("input_id")
+  inputType    String?              @map("input_type")
+  inputSnippet String?              @map("input_snippet")
+  result       Json
+  confidence   Float                @default(0.8)
+  modelVersion String               @default("gemini-1.5-flash") @map("model_version")
+  createdAt    DateTime             @default(now()) @map("created_at")
+
+  @@index([type])
+  @@index([inputId])
+  @@map("ai_classifications")
+}
+
+// ============================================================================
+// 10. AUDIT LOGGING
+// ============================================================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  @map("user_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String?  @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
