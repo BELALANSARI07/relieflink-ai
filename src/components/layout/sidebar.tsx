@@ -48,17 +48,23 @@ export function Sidebar({ currentRole = "GOVERNMENT_AUTHORITY" }: SidebarProps) 
   return (
     <aside className="w-64 bg-slate-950 text-slate-200 border-r border-slate-800 flex flex-col h-screen fixed left-0 top-0 z-40">
       {/* Brand Header */}
-      <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800/80 bg-slate-950/50">
-        <div className="h-9 w-9 rounded-lg bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400">
+      <Link
+        href="/"
+        title="Go to Public Landing Portal"
+        className="h-16 flex items-center gap-3 px-6 border-b border-slate-800/80 bg-slate-950/50 hover:bg-slate-900/50 transition group"
+      >
+        <div className="h-9 w-9 rounded-lg bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform">
           <ShieldAlert className="h-5 w-5" />
         </div>
         <div>
           <span className="font-bold text-base tracking-wide text-white flex items-center gap-1.5">
             ReliefLink <span className="text-sky-400 font-extrabold text-xs px-1.5 py-0.5 rounded bg-sky-950 border border-sky-800">AI</span>
           </span>
-          <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Disaster Response Grid</p>
+          <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider group-hover:text-sky-400 transition-colors">
+            ← Public Landing Portal
+          </p>
         </div>
-      </div>
+      </Link>
 
       {/* Nav Links */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
