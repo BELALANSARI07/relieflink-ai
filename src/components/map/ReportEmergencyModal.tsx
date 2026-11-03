@@ -46,13 +46,30 @@ export function ReportEmergencyModal({
       setLng(coordinates.lng.toFixed(6));
       setAddress(`Sector coordinates [${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}]`);
 
-      // Attempt reverse geocoding via OpenStreetMap Nominatim
+      // Attempt reverse geocoding via MapTiler API with OpenStreetMap Nominatim fallback
       async function reverseGeocode() {
         setLoadingAddress(true);
+        const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || "0wFmwfzytbhjMBwAWIXH";
         try {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 3500);
 
+          // 1. Try MapTiler Reverse Geocoding
+          const maptilerRes = await fetch(
+            `https://api.maptiler.com/geocoding/${coordinates?.lng},${coordinates?.lat}.json?key=${MAPTILER_KEY}&limit=1`,
+            { signal: controller.signal }
+          );
+
+          if (maptilerRes.ok) {
+            const data = await maptilerRes.json();
+            if (data && data.features && data.features.length > 0) {
+              setAddress(data.features[0].place_name);
+              clearTimeout(timeout);
+              return;
+            }
+          }
+
+          // 2. Fallback to Nominatim
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coordinates?.lat}&lon=${coordinates?.lng}`,
             {

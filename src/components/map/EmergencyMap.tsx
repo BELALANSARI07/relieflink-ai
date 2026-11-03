@@ -67,8 +67,10 @@ export function EmergencyMap({
   const userLocationPinRef = useRef<any>(null);
   const LRef = useRef<any>(null);
 
+  const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || "0wFmwfzytbhjMBwAWIXH";
+
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [basemap, setBasemap] = useState<"dark" | "osm" | "satellite">("dark");
+  const [basemap, setBasemap] = useState<"dark" | "osm" | "satellite" | "topo">("dark");
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -114,12 +116,12 @@ export function EmergencyMap({
 
       mapInstanceRef.current = map;
 
-      // Basemap Tile Layer
+      // Basemap Tile Layer (MapTiler Premium Dark Vector/Raster with CartoDB fallback)
       const darkTiles = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        `https://api.maptiler.com/maps/streets-v2-dark/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
         {
           maxZoom: 19,
-          subdomains: "abcd",
+          attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }
       );
       darkTiles.addTo(map);
@@ -198,17 +200,35 @@ export function EmergencyMap({
     let newLayer: any;
     if (basemap === "dark") {
       newLayer = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        { maxZoom: 19, subdomains: "abcd" }
+        `https://api.maptiler.com/maps/streets-v2-dark/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+        {
+          maxZoom: 19,
+          attribution: '&copy; MapTiler &copy; OpenStreetMap',
+        }
       );
     } else if (basemap === "osm") {
-      newLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-      });
+      newLayer = L.tileLayer(
+        `https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+        {
+          maxZoom: 19,
+          attribution: '&copy; MapTiler &copy; OpenStreetMap',
+        }
+      );
+    } else if (basemap === "satellite") {
+      newLayer = L.tileLayer(
+        `https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`,
+        {
+          maxZoom: 19,
+          attribution: '&copy; MapTiler &copy; OpenStreetMap',
+        }
+      );
     } else {
       newLayer = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 18 }
+        `https://api.maptiler.com/maps/topo-v2/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+        {
+          maxZoom: 19,
+          attribution: '&copy; MapTiler &copy; OpenStreetMap',
+        }
       );
     }
 
@@ -599,6 +619,25 @@ export function EmergencyMap({
 
     setSearching(true);
     try {
+      // 1. Try MapTiler Geocoding API
+      const maptilerRes = await fetch(
+        `https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${MAPTILER_KEY}&limit=5`
+      );
+      if (maptilerRes.ok) {
+        const maptilerData = await maptilerRes.json();
+        if (maptilerData.features && maptilerData.features.length > 0) {
+          const formatted = maptilerData.features.map((f: any) => ({
+            display_name: f.place_name,
+            lat: f.center[1],
+            lon: f.center[0],
+          }));
+          setSearchResults(formatted);
+          setIsSearchOpen(true);
+          return;
+        }
+      }
+
+      // 2. Fallback to OpenStreetMap Nominatim
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           searchQuery
@@ -706,6 +745,16 @@ export function EmergencyMap({
               }`}
             >
               Satellite
+            </button>
+            <button
+              onClick={() => setBasemap("topo")}
+              className={`px-2 py-1 rounded-lg font-semibold transition ${
+                basemap === "topo"
+                  ? "bg-sky-600 text-white"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Terrain Topo
             </button>
           </div>
 
