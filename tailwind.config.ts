@@ -28,6 +28,29 @@ const config: Config = {
           moderate: "#eab308", // Yellow
           low: "#16a34a", // Green
         },
+        // Portal Theming Tokens (Civilian/NGO Light Peach vs Authority/Field Dark Navy)
+        peach: {
+          bg: "#FFF7F2",
+          sub: "#FFF0E8",
+          card: "#FFFFFF",
+          surface: "#FFE3D5",
+          primary: "#F2A789",
+          accent: "#DB8064",
+          text: "#352823",
+          muted: "#79665F",
+          border: "#F1DED4",
+        },
+        navy: {
+          bg: "#0B1220",
+          sub: "#111C2E",
+          panel: "#17263B",
+          elevated: "#21334B",
+          text: "#F1F5F9",
+          muted: "#A9B7CA",
+          cyan: "#56C5E8",
+          blue: "#438EED",
+          border: "#2B3C52",
+        },
         card: {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",

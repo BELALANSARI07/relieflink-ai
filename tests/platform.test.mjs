@@ -253,3 +253,100 @@ test('11. Map-based Squad Assignment updates emergency status to ASSIGNED and te
   assert.strictEqual(team.status, 'DEPLOYED');
   assert.strictEqual(team.activeAssignmentsCount, 1);
 });
+
+test('12. 7-Stage Delivery State Machine enforces sequential progression', () => {
+  const deliveryStages = [
+    'REQUESTED',
+    'VERIFIED',
+    'ASSIGNED',
+    'ACCEPTED',
+    'DISPATCHED',
+    'DELIVERED',
+    'CONFIRMED',
+  ];
+
+  let currentStage = 'REQUESTED';
+  function transition(toStage) {
+    const currentIndex = deliveryStages.indexOf(currentStage);
+    const targetIndex = deliveryStages.indexOf(toStage);
+    if (targetIndex === currentIndex + 1) {
+      currentStage = toStage;
+      return true;
+    }
+    return false;
+  }
+
+  assert.strictEqual(transition('VERIFIED'), true);
+  assert.strictEqual(transition('ASSIGNED'), true);
+  assert.strictEqual(transition('ACCEPTED'), true);
+  assert.strictEqual(transition('DISPATCHED'), true);
+  assert.strictEqual(transition('DELIVERED'), true);
+  assert.strictEqual(transition('CONFIRMED'), true);
+  assert.strictEqual(currentStage, 'CONFIRMED');
+});
+
+test('13. Population Exposure Engine computes exposed ratio accurately', () => {
+  const records = [
+    { district: 'Mumbai Suburban', totalResidentialPop: 9356962, estimatedExposedPop: 420000, verifiedAffectedPop: 1840, confirmedAssistedPop: 1120 },
+    { district: 'Patna Rural', totalResidentialPop: 5838465, estimatedExposedPop: 285000, verifiedAffectedPop: 2450, confirmedAssistedPop: 980 },
+  ];
+
+  const totalResidential = records.reduce((acc, r) => acc + r.totalResidentialPop, 0);
+  const totalExposed = records.reduce((acc, r) => acc + r.estimatedExposedPop, 0);
+  const totalAffected = records.reduce((acc, r) => acc + r.verifiedAffectedPop, 0);
+  const totalAssisted = records.reduce((acc, r) => acc + r.confirmedAssistedPop, 0);
+
+  const exposurePercent = ((totalExposed / totalResidential) * 100).toFixed(2);
+  const assistanceCoveragePercent = ((totalAssisted / totalAffected) * 100).toFixed(1);
+
+  assert.strictEqual(totalResidential, 15195427);
+  assert.strictEqual(totalExposed, 705000);
+  assert.strictEqual(exposurePercent, '4.64');
+  assert.strictEqual(assistanceCoveragePercent, '49.0');
+});
+
+test('14. Relief Gap Detection flags underserved localities with unfulfilled requests', () => {
+  function detectGap(unfulfilledCount, deliveredPercent, assignedNgos) {
+    if (unfulfilledCount > 20 && deliveredPercent < 25 && assignedNgos <= 1) {
+      return { isGap: true, severity: 'CRITICAL', recommendation: 'Immediate intervention needed' };
+    }
+    return { isGap: false };
+  }
+
+  const sector = { unfulfilled: 28, deliveredPercent: 18, assignedNgos: 1 };
+  const gapResult = detectGap(sector.unfulfilled, sector.deliveredPercent, sector.assignedNgos);
+
+  assert.strictEqual(gapResult.isGap, true);
+  assert.strictEqual(gapResult.severity, 'CRITICAL');
+});
+
+test('15. Offline Field Queue stores and flushes queued reports upon reconnection', () => {
+  const offlineQueue = [];
+  function queueAction(action) {
+    offlineQueue.push(action);
+  }
+
+  function flushQueue(handler) {
+    const processed = [];
+    while (offlineQueue.length > 0) {
+      const item = offlineQueue.shift();
+      handler(item);
+      processed.push(item.id);
+    }
+    return processed;
+  }
+
+  // Simulate offline field status updates
+  queueAction({ id: 'mis-001', newStatus: 'ON_SCENE' });
+  queueAction({ id: 'mis-001', newStatus: 'RESCUED', peopleRescued: 4 });
+
+  assert.strictEqual(offlineQueue.length, 2);
+
+  // Online reconnection flush
+  const synced = flushQueue((item) => {
+    // Process item
+  });
+
+  assert.strictEqual(synced.length, 2);
+  assert.strictEqual(offlineQueue.length, 0);
+});

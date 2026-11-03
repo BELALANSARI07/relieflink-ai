@@ -312,3 +312,140 @@ export interface AiRecommendationItem {
   modelVersion: string;
   createdAt: string;
 }
+
+// --------------------------------------------------------------------------
+// ADVANCED LIFECYCLE, POPULATION, VERIFICATION & LOGISTICS EXTENSIONS
+// --------------------------------------------------------------------------
+
+export type DeliveryStatus =
+  | 'REQUESTED'
+  | 'VERIFIED'
+  | 'ASSIGNED'
+  | 'ACCEPTED'
+  | 'DISPATCHED'
+  | 'DELIVERED'
+  | 'CONFIRMED';
+
+export interface DeliverySupplyItem {
+  item: string;
+  quantity: number;
+  unit: string;
+  batchNumber?: string;
+  expiryDate?: string;
+}
+
+export interface DeliveryRecord {
+  id: string;
+  sosId: string;
+  disasterId: string;
+  ngoId: string;
+  ngoName: string;
+  recipientName: string;
+  recipientAddress: string;
+  recipientCoords: [number, number];
+  recipientPhone: string;
+  supplies: DeliverySupplyItem[];
+  status: DeliveryStatus;
+  dispatchedAt?: string | null;
+  deliveredAt?: string | null;
+  confirmedAt?: string | null;
+  responsiblePersonnel: string;
+  vehicleRegistration?: string | null;
+  deliveryEvidenceUrl?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type IncidentVerificationStatus =
+  | 'UNVERIFIED'
+  | 'VERIFICATION_PENDING'
+  | 'VERIFICATION_IN_PROGRESS'
+  | 'VERIFIED'
+  | 'REJECTED'
+  | 'DUPLICATE_SUSPECTED'
+  | 'ESCALATED'
+  | 'RESOLVED';
+
+export interface VerificationAuditRecord {
+  id: string;
+  incidentId: string;
+  previousStatus: IncidentVerificationStatus;
+  newStatus: IncidentVerificationStatus;
+  verifiedById: string;
+  verifiedByName: string;
+  evidenceNotes: string;
+  timestamp: string;
+}
+
+export interface PopulationExposureRecord {
+  id: string;
+  district: string;
+  state: string;
+  totalResidentialPop: number;
+  estimatedExposedPop: number;
+  verifiedAffectedPop: number;
+  confirmedAssistedPop: number;
+  confidenceScore: number;
+  dataSource: string;
+  vintageYear: number;
+  lastUpdated: string;
+  vulnerabilityBreakdown: {
+    elderly: number;
+    children: number;
+    medicalNeeds: number;
+  };
+}
+
+export interface ReliefGapRecord {
+  id: string;
+  sectorId: string;
+  sectorName: string;
+  district: string;
+  coordinates: [number, number];
+  exposedPop: number;
+  unfulfilledRequestsCount: number;
+  deliveredSuppliesPercent: number;
+  assignedNgosCount: number;
+  severityLevel: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW';
+  gapType: 'FOOD' | 'WATER' | 'MEDICAL' | 'SHELTER' | 'NO_NGO_ASSIGNED';
+  recommendations: string;
+  lastAssessedAt: string;
+}
+
+export interface FieldMission {
+  id: string;
+  sosId: string;
+  teamId: string;
+  teamName: string;
+  title: string;
+  priority: 'CRITICAL' | 'HIGH' | 'MODERATE';
+  targetAddress: string;
+  coordinates: [number, number];
+  peopleCount: number;
+  status: 'ASSIGNED' | 'ACCEPTED' | 'EN_ROUTE' | 'ON_SCENE' | 'RESCUED' | 'COMPLETED';
+  tacticalOrders: string;
+  hazards: string[];
+  arrivalConfirmedAt?: string | null;
+  completedAt?: string | null;
+  evidenceNotes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NgoSurplusItem {
+  id: string;
+  ngoId: string;
+  ngoName: string;
+  item: string;
+  category: 'FOOD' | 'WATER' | 'MEDICAL' | 'SHELTER' | 'RESCUE_GEAR';
+  quantity: number;
+  unit: string;
+  storageWarehouse: string;
+  expiryDate?: string;
+  status: 'OFFERED' | 'CLAIMED' | 'IN_TRANSIT' | 'TRANSFERRED';
+  contactPerson: string;
+  contactPhone: string;
+  createdAt: string;
+}
+

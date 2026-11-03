@@ -78,19 +78,106 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
-              href="/sos/new"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm tracking-wide shadow-xl shadow-red-600/30 flex items-center justify-center gap-2 transition"
+              href="/citizen"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#DB8064] hover:bg-[#c97358] text-white font-extrabold text-sm tracking-wide shadow-xl shadow-[#DB8064]/30 flex items-center justify-center gap-2 transition"
             >
               <LifeBuoy className="h-5 w-5" />
-              <span>CITIZEN EMERGENCY SOS</span>
+              <span>CITIZEN EMERGENCY PORTAL</span>
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/authority"
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-sm tracking-wide shadow-xl shadow-sky-600/30 flex items-center justify-center gap-2 transition"
             >
-              <span>ACCESS COMMAND CENTER</span>
+              <span>GOVERNMENT AUTHORITY COMMAND</span>
               <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {/* Four Connected User Portals Showcase */}
+          <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto text-left">
+            <Link
+              href="/citizen"
+              className="p-5 rounded-2xl bg-gradient-to-b from-[#FFF7F2] to-[#FFE3D5] text-[#352823] border border-[#F1DED4] hover:scale-102 transition group flex flex-col justify-between shadow-md"
+            >
+              <div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-white text-[#DB8064] border border-[#F2A789]">
+                  Civilian Portal
+                </span>
+                <h3 className="font-black text-base mt-2 text-[#352823] group-hover:text-[#DB8064] transition">
+                  Citizens & Families
+                </h3>
+                <p className="text-xs text-[#79665F] mt-1 line-clamp-3">
+                  Warm peach & cream interface. Request food, water, medical aid, track assigned rescuers, and find safe shelters.
+                </p>
+              </div>
+              <div className="pt-3 font-bold text-xs text-[#DB8064] flex items-center gap-1">
+                <span>Enter Civilian Portal</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+
+            <Link
+              href="/ngo"
+              className="p-5 rounded-2xl bg-gradient-to-b from-[#FFF7F2] to-[#FFE3D5] text-[#352823] border border-[#F1DED4] hover:scale-102 transition group flex flex-col justify-between shadow-md"
+            >
+              <div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-white text-[#DB8064] border border-[#F2A789]">
+                  NGO Portal
+                </span>
+                <h3 className="font-black text-base mt-2 text-[#352823] group-hover:text-[#DB8064] transition">
+                  Humanitarian NGOs
+                </h3>
+                <p className="text-xs text-[#79665F] mt-1 line-clamp-3">
+                  Logistics dashboard, inventory management with expiry dates, 7-stage delivery verification, and surplus sharing.
+                </p>
+              </div>
+              <div className="pt-3 font-bold text-xs text-[#DB8064] flex items-center gap-1">
+                <span>Enter NGO Portal</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+
+            <Link
+              href="/authority"
+              className="p-5 rounded-2xl bg-[#111C2E] text-white border border-[#2B3C52] hover:scale-102 transition group flex flex-col justify-between shadow-md"
+            >
+              <div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#17263B] text-[#56C5E8] border border-[#56C5E8]/40">
+                  Command Center
+                </span>
+                <h3 className="font-black text-base mt-2 text-white group-hover:text-[#56C5E8] transition">
+                  Government Authority
+                </h3>
+                <p className="text-xs text-[#A9B7CA] mt-1 line-clamp-3">
+                  Dark operations grid. Population exposure intelligence (Census & WorldPop), relief gap analysis, and incident verification.
+                </p>
+              </div>
+              <div className="pt-3 font-bold text-xs text-[#56C5E8] flex items-center gap-1">
+                <span>Enter Command Grid</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+
+            <Link
+              href="/field"
+              className="p-5 rounded-2xl bg-[#111C2E] text-white border border-[#2B3C52] hover:scale-102 transition group flex flex-col justify-between shadow-md"
+            >
+              <div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#17263B] text-cyan-400 border border-cyan-800">
+                  Field Operations
+                </span>
+                <h3 className="font-black text-base mt-2 text-white group-hover:text-cyan-400 transition">
+                  Rescue Squads
+                </h3>
+                <p className="text-xs text-[#A9B7CA] mt-1 line-clamp-3">
+                  Tactical field UI for NDRF/SDRF with large controls, mission priority, GPS directions, and offline-first PWA sync.
+                </p>
+              </div>
+              <div className="pt-3 font-bold text-xs text-cyan-400 flex items-center gap-1">
+                <span>Enter Field Portal</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </div>
             </Link>
           </div>
 

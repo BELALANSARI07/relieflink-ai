@@ -15,6 +15,14 @@ import {
   Volunteer,
   NotificationItem,
   AiRecommendationItem,
+  DeliveryRecord,
+  DeliveryStatus,
+  IncidentVerificationStatus,
+  VerificationAuditRecord,
+  PopulationExposureRecord,
+  ReliefGapRecord,
+  FieldMission,
+  NgoSurplusItem,
 } from "@/types";
 
 // Initial Seed Data
@@ -665,6 +673,298 @@ const initialAiRecommendations: AiRecommendationItem[] = [
   },
 ];
 
+const initialDeliveries: DeliveryRecord[] = [
+  {
+    id: "del-101",
+    sosId: "sos-101",
+    disasterId: "dis-001",
+    ngoId: "ngo-001",
+    ngoName: "Oxfam Relief Foundation India",
+    recipientName: "Priya Sharma",
+    recipientAddress: "Bungalow 14, Fisherman Colony, Mahim Creek",
+    recipientCoords: [19.0820, 72.8850],
+    recipientPhone: "+91-94567-89012",
+    supplies: [
+      { item: "Food Ration Kits", quantity: 4, unit: "family packs" },
+      { item: "Potable Water Cartons", quantity: 6, unit: "cartons (20L)" },
+      { item: "Diabetic Insulin Cooler Bag", quantity: 1, unit: "kit" },
+    ],
+    status: "CONFIRMED",
+    dispatchedAt: "2026-11-01T13:15:00Z",
+    deliveredAt: "2026-11-01T14:30:00Z",
+    confirmedAt: "2026-11-01T14:45:00Z",
+    responsiblePersonnel: "Rajesh Shinde (Lead Logistics Field Agent)",
+    vehicleRegistration: "MH-01-CR-8821",
+    deliveryEvidenceUrl: "/evidence/del-101-receipt.jpg",
+    notes: "Direct hand-off confirmed by terrace evacuees via digital biometric acknowledgment.",
+    createdAt: "2026-11-01T13:00:00Z",
+    updatedAt: "2026-11-01T14:45:00Z",
+  },
+  {
+    id: "del-102",
+    sosId: "sos-102",
+    disasterId: "dis-001",
+    ngoId: "ngo-002",
+    ngoName: "Indian Red Cross Society — Disaster Wing",
+    recipientName: "Suresh Patil",
+    recipientAddress: "Bandra West Junction Commercial Complex",
+    recipientCoords: [19.0550, 72.8350],
+    recipientPhone: "+91-98200-11223",
+    supplies: [
+      { item: "Orthopedic Splints & Traction Bands", quantity: 2, unit: "sets" },
+      { item: "IV Saline & Trauma Dressing Kits", quantity: 12, unit: "pouches" },
+    ],
+    status: "DISPATCHED",
+    dispatchedAt: "2026-11-01T14:20:00Z",
+    deliveredAt: null,
+    confirmedAt: null,
+    responsiblePersonnel: "Dr. K. Saxena (Paramedic Mobile Squad)",
+    vehicleRegistration: "MH-02-ER-4410",
+    deliveryEvidenceUrl: null,
+    notes: "Ambulance en route under police flood escort.",
+    createdAt: "2026-11-01T14:00:00Z",
+    updatedAt: "2026-11-01T14:20:00Z",
+  },
+  {
+    id: "del-103",
+    sosId: "sos-103",
+    disasterId: "dis-002",
+    ngoId: "ngo-003",
+    ngoName: "Goonj Community Relief",
+    recipientName: "Danapur Diara Community Head",
+    recipientAddress: "Danapur Diara Sector, Patna Rural",
+    recipientCoords: [25.6200, 85.0800],
+    recipientPhone: "+91-99340-99881",
+    supplies: [
+      { item: "Ready-to-Eat Emergency Meals", quantity: 180, unit: "packets" },
+      { item: "Chlorine Water Purification Drops", quantity: 50, unit: "bottles" },
+    ],
+    status: "ACCEPTED",
+    dispatchedAt: null,
+    deliveredAt: null,
+    confirmedAt: null,
+    responsiblePersonnel: "Manoj Kumar (Patna Hub Manager)",
+    vehicleRegistration: "BR-01-GB-9022",
+    deliveryEvidenceUrl: null,
+    notes: "Awaiting barge clearance across Ganga river breach.",
+    createdAt: "2026-11-01T16:00:00Z",
+    updatedAt: "2026-11-01T16:15:00Z",
+  },
+];
+
+const initialPopulationExposure: PopulationExposureRecord[] = [
+  {
+    id: "pop-001",
+    district: "Mumbai Suburban",
+    state: "Maharashtra",
+    totalResidentialPop: 9356962,
+    estimatedExposedPop: 420000,
+    verifiedAffectedPop: 1840,
+    confirmedAssistedPop: 1120,
+    confidenceScore: 0.94,
+    dataSource: "Census of India & WorldPop 100m High-Resolution Grid",
+    vintageYear: 2024,
+    lastUpdated: "2026-11-01T16:00:00Z",
+    vulnerabilityBreakdown: {
+      elderly: 48000,
+      children: 62000,
+      medicalNeeds: 14500,
+    },
+  },
+  {
+    id: "pop-002",
+    district: "Patna Rural",
+    state: "Bihar",
+    totalResidentialPop: 5838465,
+    estimatedExposedPop: 285000,
+    verifiedAffectedPop: 2450,
+    confirmedAssistedPop: 980,
+    confidenceScore: 0.91,
+    dataSource: "Census of India & GHSL Built-Up Settlement Layer",
+    vintageYear: 2023,
+    lastUpdated: "2026-11-01T15:30:00Z",
+    vulnerabilityBreakdown: {
+      elderly: 31000,
+      children: 49000,
+      medicalNeeds: 8900,
+    },
+  },
+  {
+    id: "pop-003",
+    district: "Tehri Garhwal / Rishikesh",
+    state: "Uttarakhand",
+    totalResidentialPop: 618931,
+    estimatedExposedPop: 35000,
+    verifiedAffectedPop: 210,
+    confirmedAssistedPop: 195,
+    confidenceScore: 0.88,
+    dataSource: "Survey of India & National Disaster Management Grid",
+    vintageYear: 2024,
+    lastUpdated: "2026-10-31T12:00:00Z",
+    vulnerabilityBreakdown: {
+      elderly: 4200,
+      children: 5800,
+      medicalNeeds: 920,
+    },
+  },
+];
+
+const initialReliefGaps: ReliefGapRecord[] = [
+  {
+    id: "gap-001",
+    sectorId: "sec-danapur-diara",
+    sectorName: "Danapur Diara Embankment Cutoff",
+    district: "Patna Rural",
+    coordinates: [25.6200, 85.0800],
+    exposedPop: 45000,
+    unfulfilledRequestsCount: 28,
+    deliveredSuppliesPercent: 18,
+    assignedNgosCount: 1,
+    severityLevel: "CRITICAL",
+    gapType: "FOOD",
+    recommendations: "Immediate riverine barge dispatch with 1,500 potable water cartons and family ration packets. 28 requests pending over 16 hours.",
+    lastAssessedAt: "2026-11-01T16:30:00Z",
+  },
+  {
+    id: "gap-002",
+    sectorId: "sec-dharavi-transit",
+    sectorName: "Dharavi Transit Relocation Sector",
+    district: "Mumbai Suburban",
+    coordinates: [19.0400, 72.8550],
+    exposedPop: 18500,
+    unfulfilledRequestsCount: 14,
+    deliveredSuppliesPercent: 42,
+    assignedNgosCount: 2,
+    severityLevel: "HIGH",
+    gapType: "SHELTER",
+    recommendations: "Dharavi Sports Complex shelter has exceeded 85% occupancy threshold. Open secondary emergency shelter at Sion Municipal Hall.",
+    lastAssessedAt: "2026-11-01T15:45:00Z",
+  },
+  {
+    id: "gap-003",
+    sectorId: "sec-muni-ki-reti",
+    sectorName: "Muni Ki Reti Rockfall Ingress Corridor",
+    district: "Tehri Garhwal",
+    coordinates: [30.1380, 78.3120],
+    exposedPop: 4200,
+    unfulfilledRequestsCount: 4,
+    deliveredSuppliesPercent: 72,
+    assignedNgosCount: 1,
+    severityLevel: "MODERATE",
+    gapType: "MEDICAL",
+    recommendations: "Replenish local primary health center tetanus toxoid and fracture splints following NH-58 rockfall clearance.",
+    lastAssessedAt: "2026-10-31T14:00:00Z",
+  },
+];
+
+const initialFieldMissions: FieldMission[] = [
+  {
+    id: "mis-001",
+    sosId: "sos-101",
+    teamId: "team-001",
+    teamName: "NDRF Bravo Amphibious Unit",
+    title: "Amphibious Terrace Extraction at Mahim Creek",
+    priority: "CRITICAL",
+    targetAddress: "Bungalow 14, Fisherman Colony, Mahim Creek",
+    coordinates: [19.0820, 72.8850],
+    peopleCount: 4,
+    status: "ON_SCENE",
+    tacticalOrders: "Deploy Gemini inflatable reconnaissance craft. High-tide expected in 45m. Extract 4 persons including diabetic senior citizen.",
+    hazards: ["Submerged electrical wires", "Floating debris", "1.8 knot water velocity"],
+    arrivalConfirmedAt: "2026-11-01T13:40:00Z",
+    completedAt: null,
+    evidenceNotes: "Craft stationed at outer perimeter; line deployed to 2nd-floor railing.",
+    createdAt: "2026-11-01T13:00:00Z",
+    updatedAt: "2026-11-01T13:40:00Z",
+  },
+  {
+    id: "mis-002",
+    sosId: "sos-102",
+    teamId: "team-002",
+    teamName: "SDRF Rapid Trauma Squad",
+    title: "Heavy Structural Extrication at Bandra West",
+    priority: "CRITICAL",
+    targetAddress: "Bandra West Junction Commercial Complex",
+    coordinates: [19.0550, 72.8350],
+    peopleCount: 2,
+    status: "EN_ROUTE",
+    tacticalOrders: "Use hydraulic cutters and pneumatic air lifting bags. 2 casualties with open lower limb fractures pinned under concrete beam.",
+    hazards: ["Secondary structural collapse risk", "Gas pipeline proximity"],
+    arrivalConfirmedAt: null,
+    completedAt: null,
+    evidenceNotes: null,
+    createdAt: "2026-11-01T14:15:00Z",
+    updatedAt: "2026-11-01T14:20:00Z",
+  },
+  {
+    id: "mis-003",
+    sosId: "sos-103",
+    teamId: "team-003",
+    teamName: "Bihar SDRF Flood Battalion",
+    title: "Diara Community Hall Evacuation & Relief Drop",
+    priority: "HIGH",
+    targetAddress: "Danapur Diara Sector, Patna Rural",
+    coordinates: [25.6200, 85.0800],
+    peopleCount: 45,
+    status: "ACCEPTED",
+    tacticalOrders: "Establish motorized boat bridge from Danapur Ghat to Diara. Ferry drinking water cans first, then commence women and child evacuation.",
+    hazards: ["Mud suction", "Submerged barbed wire fences"],
+    arrivalConfirmedAt: null,
+    completedAt: null,
+    evidenceNotes: null,
+    createdAt: "2026-11-01T16:10:00Z",
+    updatedAt: "2026-11-01T16:15:00Z",
+  },
+];
+
+const initialNgoSurplus: NgoSurplusItem[] = [
+  {
+    id: "surplus-001",
+    ngoId: "ngo-001",
+    ngoName: "Oxfam Relief Foundation India",
+    item: "High-Energy Fortified Nutrition Biscuits",
+    category: "FOOD",
+    quantity: 600,
+    unit: "cartons (14,400 meals)",
+    storageWarehouse: "Kurla SDMA Central Logistics Hub",
+    expiryDate: "2027-04-30",
+    status: "OFFERED",
+    contactPerson: "Amina Sheikh (Coordination Officer)",
+    contactPhone: "+91-98123-45678",
+    createdAt: "2026-11-01T10:00:00Z",
+  },
+  {
+    id: "surplus-002",
+    ngoId: "ngo-002",
+    ngoName: "Indian Red Cross Society",
+    item: "Water Purification Tablets (NaDCC)",
+    category: "WATER",
+    quantity: 12000,
+    unit: "tablets (60,000L safe water)",
+    storageWarehouse: "Bandra Relief Depot",
+    expiryDate: "2028-01-15",
+    status: "OFFERED",
+    contactPerson: "Dr. K. Saxena",
+    contactPhone: "+91-98200-11223",
+    createdAt: "2026-11-01T11:30:00Z",
+  },
+  {
+    id: "surplus-003",
+    ngoId: "ngo-003",
+    ngoName: "Goonj Community Relief",
+    item: "Family Tarpaulins & Bamboo Structural Poles",
+    category: "SHELTER",
+    quantity: 250,
+    unit: "shelter shelter kits",
+    storageWarehouse: "Patna South Warehouse",
+    expiryDate: undefined,
+    status: "OFFERED",
+    contactPerson: "Manoj Kumar",
+    contactPhone: "+91-99340-99881",
+    createdAt: "2026-11-01T14:00:00Z",
+  },
+];
+
 // Global in-memory data store instance (persists across Next.js API calls in same process)
 class DataStore {
   users: User[] = [...initialUsers];
@@ -679,6 +979,11 @@ class DataStore {
   volunteers: Volunteer[] = [...initialVolunteers];
   notifications: NotificationItem[] = [...initialNotifications];
   aiRecommendations: AiRecommendationItem[] = [...initialAiRecommendations];
+  deliveries: DeliveryRecord[] = [...initialDeliveries];
+  populationExposure: PopulationExposureRecord[] = [...initialPopulationExposure];
+  reliefGaps: ReliefGapRecord[] = [...initialReliefGaps];
+  fieldMissions: FieldMission[] = [...initialFieldMissions];
+  ngoSurplus: NgoSurplusItem[] = [...initialNgoSurplus];
 
   // Helper Methods
   getOverviewMetrics() {
@@ -758,6 +1063,72 @@ class DataStore {
       .sort((a, b) => b.score - a.score);
 
     return candidates[0] || null;
+  }
+
+  // Delivery State Machine: REQUESTED → VERIFIED → ASSIGNED → ACCEPTED → DISPATCHED → DELIVERED → CONFIRMED
+  updateDeliveryStatus(
+    deliveryId: string,
+    newStatus: DeliveryStatus,
+    metadata?: {
+      responsiblePersonnel?: string;
+      vehicleRegistration?: string;
+      deliveryEvidenceUrl?: string;
+      notes?: string;
+    }
+  ): DeliveryRecord | null {
+    const index = this.deliveries.findIndex((d) => d.id === deliveryId);
+    if (index === -1) return null;
+
+    const delivery = this.deliveries[index];
+    delivery.status = newStatus;
+    delivery.updatedAt = new Date().toISOString();
+
+    if (metadata?.responsiblePersonnel) delivery.responsiblePersonnel = metadata.responsiblePersonnel;
+    if (metadata?.vehicleRegistration) delivery.vehicleRegistration = metadata.vehicleRegistration;
+    if (metadata?.deliveryEvidenceUrl) delivery.deliveryEvidenceUrl = metadata.deliveryEvidenceUrl;
+    if (metadata?.notes) delivery.notes = metadata.notes;
+
+    if (newStatus === "DISPATCHED" && !delivery.dispatchedAt) {
+      delivery.dispatchedAt = new Date().toISOString();
+    } else if (newStatus === "DELIVERED" && !delivery.deliveredAt) {
+      delivery.deliveredAt = new Date().toISOString();
+    } else if (newStatus === "CONFIRMED" && !delivery.confirmedAt) {
+      delivery.confirmedAt = new Date().toISOString();
+    }
+
+    return delivery;
+  }
+
+  // Field Mission Update (Rescue Teams)
+  updateFieldMissionStatus(
+    missionId: string,
+    newStatus: 'ASSIGNED' | 'ACCEPTED' | 'EN_ROUTE' | 'ON_SCENE' | 'RESCUED' | 'COMPLETED',
+    notes?: string
+  ): FieldMission | null {
+    const index = this.fieldMissions.findIndex((m) => m.id === missionId);
+    if (index === -1) return null;
+
+    const mission = this.fieldMissions[index];
+    mission.status = newStatus;
+    mission.updatedAt = new Date().toISOString();
+    if (notes) mission.evidenceNotes = notes;
+
+    if (newStatus === "ON_SCENE" && !mission.arrivalConfirmedAt) {
+      mission.arrivalConfirmedAt = new Date().toISOString();
+    } else if (newStatus === "COMPLETED" && !mission.completedAt) {
+      mission.completedAt = new Date().toISOString();
+    }
+
+    return mission;
+  }
+
+  // Claim or transfer NGO surplus items
+  claimSurplus(surplusId: string, claimingNgoName: string): NgoSurplusItem | null {
+    const index = this.ngoSurplus.findIndex((s) => s.id === surplusId);
+    if (index === -1) return null;
+
+    this.ngoSurplus[index].status = "CLAIMED";
+    return this.ngoSurplus[index];
   }
 }
 

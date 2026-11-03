@@ -41,6 +41,38 @@ interface SearchItem {
 
 const SEARCH_ITEMS: SearchItem[] = [
   {
+    title: "Civilian / Citizen Portal (Warm Peach)",
+    category: "Module",
+    url: "/citizen",
+    keywords: "civilian citizen portal peach family request help track assistance shelter",
+    icon: LifeBuoy,
+    badge: "Civilian Light",
+  },
+  {
+    title: "NGO & Humanitarian Organization Portal",
+    category: "Module",
+    url: "/ngo",
+    keywords: "ngo humanitarian organization inventory delivery tracking surplus supplies oxfam",
+    icon: Building2,
+    badge: "Logistics",
+  },
+  {
+    title: "Government Authority Command Portal",
+    category: "Module",
+    url: "/authority",
+    keywords: "government authority portal command ndma population exposure relief gaps audit",
+    icon: ShieldCheck,
+    badge: "Authority",
+  },
+  {
+    title: "Rescue Team & Field Operations Portal",
+    category: "Module",
+    url: "/field",
+    keywords: "rescue team field operations tactical missions offline pwa ndrf sdrf squad",
+    icon: Radio,
+    badge: "Field Ops",
+  },
+  {
     title: "Command Center Dashboard",
     category: "Module",
     url: "/dashboard",
