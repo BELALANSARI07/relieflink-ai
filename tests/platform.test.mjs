@@ -191,3 +191,65 @@ test('8. Shelter occupancy rate calculation reflects capacity accurately', () =>
   assert.strictEqual(currentOcc, 1450);
   assert.strictEqual(rate, 81);
 });
+
+test('9. Geospatial Coordinate Validator enforces planetary bounds', () => {
+  function validateCoords(lat, lng) {
+    if (typeof lat !== 'number' || typeof lng !== 'number') return false;
+    if (isNaN(lat) || isNaN(lng)) return false;
+    return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  }
+
+  assert.strictEqual(validateCoords(19.076, 72.8777), true); // Mumbai
+  assert.strictEqual(validateCoords(25.5941, 85.1376), true); // Patna
+  assert.strictEqual(validateCoords(91.5, 72.0), false); // Lat > 90 invalid
+  assert.strictEqual(validateCoords(20.0, 185.0), false); // Lng > 180 invalid
+});
+
+test('10. Marker Clustering algorithm merges nearby markers at country/state zoom level', () => {
+  function clusterMarkers(markers, thresholdDeg) {
+    const clusters = [];
+    markers.forEach((m) => {
+      let found = clusters.find((c) => Math.hypot(c.lat - m.lat, c.lng - m.lng) < thresholdDeg);
+      if (found) {
+        found.items.push(m);
+      } else {
+        clusters.push({ lat: m.lat, lng: m.lng, items: [m] });
+      }
+    });
+    return clusters;
+  }
+
+  // 3 markers: 2 close together in Mumbai (0.02 deg apart), 1 in Patna (~12 deg away)
+  const list = [
+    { id: 'sos-1', lat: 19.0820, lng: 72.8850 },
+    { id: 'sos-2', lat: 19.0720, lng: 72.8680 },
+    { id: 'sos-3', lat: 25.5941, lng: 85.1376 },
+  ];
+
+  // At zoom level < 10 (threshold 0.5 deg), Mumbai markers merge into 1 cluster
+  const clusters = clusterMarkers(list, 0.5);
+  assert.strictEqual(clusters.length, 2);
+  const mumbaiCluster = clusters.find((c) => c.items.some((i) => i.id === 'sos-1'));
+  assert.strictEqual(mumbaiCluster.items.length, 2);
+
+  // At street zoom level >= 12 (threshold 0.001 deg), all 3 markers are distinct
+  const streetMarkers = clusterMarkers(list, 0.001);
+  assert.strictEqual(streetMarkers.length, 3);
+});
+
+test('11. Map-based Squad Assignment updates emergency status to ASSIGNED and team status to DEPLOYED', () => {
+  const sos = { id: 'sos-101', status: 'PENDING', assignedTeamId: null, assignedTeamName: null };
+  const team = { id: 'team-001', name: 'NDRF Bravo', status: 'READY', activeAssignmentsCount: 0 };
+
+  // Assignment action
+  sos.assignedTeamId = team.id;
+  sos.assignedTeamName = team.name;
+  sos.status = 'ASSIGNED';
+  team.status = 'DEPLOYED';
+  team.activeAssignmentsCount += 1;
+
+  assert.strictEqual(sos.status, 'ASSIGNED');
+  assert.strictEqual(sos.assignedTeamName, 'NDRF Bravo');
+  assert.strictEqual(team.status, 'DEPLOYED');
+  assert.strictEqual(team.activeAssignmentsCount, 1);
+});

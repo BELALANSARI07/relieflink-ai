@@ -23,9 +23,18 @@ export async function GET() {
       latitude: s.latitude,
       longitude: s.longitude,
       address: s.address,
+      description: s.description,
       peopleCount: s.peopleCount,
-      isDuplicate: s.isDuplicate,
+      medicalNeeds: s.medicalNeeds,
+      citizenName: s.citizenName,
+      contactPhone: s.contactPhone,
+      assignedTeamId: s.assignedTeamId,
       assignedTeamName: s.assignedTeamName,
+      isDuplicate: s.isDuplicate,
+      disasterId: s.disasterId,
+      disasterTitle: s.disasterTitle,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
     }));
 
     const rescueTeams = db.rescueTeams
@@ -70,6 +79,13 @@ export async function GET() {
         disasters,
         sos: sosMarkers,
         rescueTeams,
+        allRescueTeams: db.rescueTeams.map((t) => ({
+          id: t.id,
+          name: t.name,
+          specialization: t.specialization,
+          status: t.status,
+          contactNumber: t.contactNumber,
+        })),
         shelters,
         hospitals,
       },
